@@ -1,0 +1,15 @@
+- name: install bono packets
+  #apt: name=bono force=yes dpkg_options='force-confnew' state=present
+  apt: name=bono force=yes state=present
+
+- name: install clearwater-config-manager
+  apt: name=clearwater-config-manager force=yes state=present
+
+- name: wait for etcd
+  command: /usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
+
+- name: copy script
+  template: src=ns.sh dest=/tmp/ns.sh owner=root group=root mode=0744
+
+- name: exec ns.sh
+  shell: /tmp/ns.sh

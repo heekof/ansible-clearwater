@@ -1,0 +1,8 @@
+- name: install pip
+  apt: name=python-pip state=present 
+
+- name: install dnspython 
+  pip: name=dnspython
+
+# install zabbix agent?
+

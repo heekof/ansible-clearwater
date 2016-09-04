@@ -1,0 +1,15 @@
+- name: install ellis packets
+  apt: name=ellis force=yes state=present
+
+- name: install clearwater-config-manager
+  apt: name=clearwater-config-manager force=yes state=present
+
+- name: wait for etcd
+  command: /usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
+
+- name: upload_shared_config
+  command: /usr/share/clearwater/clearwater-config-manager/scripts/upload_shared_config
+
+- name: allocate a pool of numbers to assign to users
+  command: /usr/share/clearwater/ellis/env/bin/python /usr/share/clearwater/ellis/src/metaswitch/ellis/tools/create_numbers.py --start {{ user_range_start}} --count {{ user_range_length}}
+

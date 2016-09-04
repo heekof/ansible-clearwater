@@ -1,0 +1,19 @@
+- name: setup python-apt
+  apt: name=python-apt state=present 
+  tags: python-apt
+
+- name: prepare clearwater repo
+  apt_repository: repo={{ repo }} state=present update_cache=yes 
+
+- name: setup clearwater repo
+  apt_key: url={{ repo_key }} state=present   
+
+- name: create etcd folder
+  file: path=/etc/clearwater state=directory
+
+- name: copy local_config
+  template: src=local_config dest=/etc/clearwater/local_config owner=root group=root mode=0644
+
+- name: copy shared config
+  template: src=shared_config dest=/etc/clearwater/shared_config owner=root group=root mode=0644
+

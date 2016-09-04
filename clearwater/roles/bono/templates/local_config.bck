@@ -1,0 +1,5 @@
+local_ip={{ ansible_eth0.ipv4.address }}
+public_ip={{ inventory_hostname }}
+public_hostname={{ ansible_nodename }}
+etcd_cluster={{ ansible_eth0.ipv4.address }}
+

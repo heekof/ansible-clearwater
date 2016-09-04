@@ -1,0 +1,39 @@
+---
+  - hosts: ovs
+    become: true
+    tasks:
+      - name: Update cache
+        apt: update_cache=yes
+
+      - name: install required  packages
+        action: apt pkg={{ item }} state=present
+        with_items:
+          - openvswitch-datapath-source
+          - bridge-utils
+          - module-assistant
+          - openvswitch-common
+          - openvswitch-switch
+        tags:
+          - build
+
+
+      - name: add a physical interface to the virtual bridge-utils
+        action: shell  ovs-vsctl add-br br1
+        tags:
+          - configure
+
+      - name: Parse the script
+        shell: bash -c 'echo -e  "#!/bin/bash\n\nsudo ovs-vsctl add-br br1\nsudo ovs-vsctl add-port br1 eth0\nsudo ip link set dev br1 address "$(cat /sys/class/net/eth0/address)"\nsudo ifconfig eth0 0\nsudo dhclient br1\n" > script.sh'
+        tags:
+          - configure
+
+
+      - name: Set privilages
+        shell: chmod +x script.sh
+        tags:
+          - configure
+
+      - name: Create log file
+        shell: touch error.log #; ./script.sh
+        tags:
+          - configure

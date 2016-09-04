@@ -1,0 +1,26 @@
+- name: install ralf packets
+  apt: name=ralf force=yes state=present
+
+- name: install clearwater-config-manager
+  apt: name=clearwater-config-manager force=yes state=present
+  
+- name: create chronos folder
+  file: path=/etc/clearwater state=directory
+
+- name: copy chronos.conf
+  template: src=chronos.conf dest=/etc/chronos/chronos.conf owner=root group=root mode=0644
+
+- name: install sprout packets
+  apt: name=sprout force=yes dpkg_options='force-confnew' state=present
+
+- name: install clearwater-config-manager
+  apt: name=clearwater-config-manager state=present
+
+- name: wait for etcd
+  command: /usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
+
+- name: copy script
+  template: src=ns.sh dest=/tmp/ns.sh owner=root group=root mode=0744
+
+- name: exec ns.sh
+  shell: /tmp/ns.sh

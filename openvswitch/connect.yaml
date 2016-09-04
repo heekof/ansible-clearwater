@@ -1,0 +1,6 @@
+---
+  - hosts: testbed
+    become: true
+    tasks:
+      - name: Connecting
+        shell: ovs-vsctl set-controller br1 tcp:157.159.232.166:6633

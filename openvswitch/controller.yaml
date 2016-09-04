@@ -1,0 +1,36 @@
+---
+  - hosts: odl
+    tasks:
+      - name: Update cache
+        apt: update_cache=yes
+    #  - name: Adding the controller
+    #      shell: ovs-vsctl set-controller br1 tcp:157.159.232.200:6633
+    #      tags:
+    #        - configure
+      - name: Installing JAVA
+        apt: name=openjdk-7-jdk state=present
+        tags:
+          - java
+
+
+      - name: Installing Unzip
+        apt: name=unzip state=present
+
+      - name: Setting JAVA_HOME
+        shell: bash -c ' echo -e "export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64" | tee -a /home/ubuntu/.bashrc '
+        tags:
+          - configure
+
+
+
+      - name: Downloading opendaylight
+        shell: wget https://nexus.opendaylight.org/content/repositories/public/org/opendaylight/integration/distribution-karaf/0.4.3-Beryllium-SR3/distribution-karaf-0.4.3-Beryllium-SR3.zip
+        tags:
+          - download
+
+
+
+      - name: Extracting opendaylight
+        shell: unzip distribution-karaf-0.4.3-Beryllium-SR3.zip
+        tags:
+          - extract

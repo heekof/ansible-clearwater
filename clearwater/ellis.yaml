@@ -1,0 +1,48 @@
+---
+  - hosts: ellis
+    become: true
+    tasks:
+      - name: Update cache
+        apt: update_cache=yes
+      - name:
+        shell: bash -c 'echo "deb http://repo.cw-ngv.com/stable binary/" > /etc/apt/sources.list.d/clearwater.list '
+      - name: key
+        shell: curl -L http://repo.cw-ngv.com/repo_key | sudo apt-key add -
+
+      - name: Update cache
+        apt: update_cache=yes
+
+      - name: A
+        shell: mkdir -p /etc/clearwater; bash -c ' echo -e "local_ip=192.166.1.177 \n public_ip=157.159.232.198 \n public_hostname=ellis.jaafar.com \n etcd_cluster=\"192.166.1.178,192.166.1.183,192.166.1.177,192.166.1.182,192.166.1.179,192.166.1.181\"" > /etc/clearwater/local_config'
+
+      - name: B
+        shell : bash -c 'echo -e "# Deployment definitions \n home_domain=jaafar.com \n sprout_hostname=sprout.jaafar.com \n chronos_hostname=192.166.1.183:7253 \n hs_hostname=homestead.jaafar.com:8888 \n hs_provisioning_hostname=homestead.jaafar.com:8889 \n ralf_hostname=ralf.jaafar.com:10888 \n xdms_hostname=homer.jaafar.com:7888 \n   smtp_username=username \n smtp_password=password \n email_recovery_sender=TATA@TOTO.org \n signup_key=secret \n turn_workaround=secret \n ellis_api_key=secret \n ellis_cookie_key=secret " > /etc/clearwater/shared_config '
+
+
+    #  - name: install ellis packets
+    #    apt: name=ellis force=yes state=present
+
+    #  - name: install clearwater-config-manager
+    #    apt: name=clearwater-management force=yes state=present
+
+    #  - name: wait for etcd
+    #    command: /usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
+
+    #  - name: upload_shared_config
+    #    command: /usr/share/clearwater/clearwater-config-manager/scripts/upload_shared_config
+
+
+      - name: Open up port
+        shell: ufw --force enable ; ufw allow 22/tcp ; ufw allow 2380/tcp ; ufw allow 161:162/udp ; ufw allow 4000/tcp ; ufw allow 10888/tcp ; ufw allow 7253/tcp ; ufw allow 11211/tcp ; ufw allow  80/tcp ; ufw allow  6633/tcp
+
+    #  - name: create number
+    #    shell: bash -c 'echo -e "export PATH=/usr/share/clearwater/ellis/env/bin:$PATH \n cd /usr/share/clearwater/ellis/src/metaswitch/ellis/tools/ \n python create_numbers.py --start 6505550000 --count 1000" > create_number.py'
+
+    #  - name: iiii
+    #    shell: chmod +x create_number.py ; ./create_number.py
+
+      - name: toto
+        shell: bash -c 'echo "nameserver 192.166.1.180" > /etc/dnsmasq.resolv.conf' ; touch /etc/dnsmasq.resolv.conf ; bash -c 'echo "nameserver 192.166.1.180" > /etc/dnsmasq.resolv.conf' ; bash -c 'echo "RESOLV_CONF=/etc/dnsmasq.resolv.conf" >> /etc/default/dnsmasq'
+
+      # Example action to restart service dnsmasq, in all cases
+      - service: name=dnsmasq state=restarted

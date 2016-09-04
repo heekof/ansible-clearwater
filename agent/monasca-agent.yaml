@@ -1,0 +1,139 @@
+---
+  - hosts: rest
+    tasks:
+      - name: Update cache
+        apt: update_cache=yes
+        become: true
+
+      - name: install required  packages
+        action: apt pkg={{ item }} state=present
+        with_items:
+          - autotools-dev
+          - blt-dev
+          - bzip2
+          - dpkg-dev
+          - g++-multilib
+          - gcc-multilib
+          - libbluetooth-dev
+          - libbz2-dev
+          - libexpat1-dev
+          - libffi-dev
+          - libffi6
+          - libffi6-dbg
+          - libgdbm-dev
+          - libgpm2
+          - libncursesw5-dev
+          - libreadline-dev
+          - libsqlite3-dev
+          - libssl-dev
+          - libtinfo-dev
+          - mime-support
+          - net-tools
+          - netbase
+          - python-crypto
+          - python-mox3
+          - python-pil
+          - python-ply
+          - quilt
+          - tk-dev
+          - zlib1g-dev
+          - git
+          - libxml2-dev
+          - libxslt-dev
+          - libxslt1-dev
+          - python-dev
+        tags:
+          - aptdep
+        become: true
+
+
+      - name: Install pip
+        apt: name=python-pip
+        become: true
+
+      - name: Upgrade pip in virtualenv
+        pip: name=pip version=8.1.2 virtualenv=/home/ubuntu/monitoring-agent/Python-2.7.11/venv/
+        become: true
+        tags: pip
+
+      - name: Upgrade pip in virtualenv
+        pip: name=virtualenv
+        become: true
+
+      - name: delete empty dir
+        shell: rm -rf /home/ubuntu/monitoring-agent
+        become: true
+
+      - name: Cloning git repo monasca-agent
+        git: repo=https://github.com/heekof/monitoring-agent.git dest=/home/ubuntu/monitoring-agent recursive=yes clone=yes # the first time put to no
+        become: false
+        tags: git
+      #  when: ansible_os_family == 'RedHat'
+
+      - name: install required  packages remove
+        action: apt pkg={{ item }} state=absent
+        with_items:
+          - language-pack-fr
+          - language-pack-kde-fr
+          - language-pack-en
+          - language-pack-kde-en
+        when: ansible_os_family == 'RedHat'
+        become: true
+
+      - name: install required  packages reinstall
+        action: apt pkg={{ item }} state=present
+        with_items:
+          - language-pack-fr
+          - language-pack-kde-fr
+          - language-pack-en
+          - language-pack-kde-en
+#        when: ansible_os_family == 'RedHat'
+        tags: packdep
+        become: true
+
+      - name: delete empty dir
+        shell: rm -rf /home/ubuntu/monitoring-agent/monasca-agent
+        become: true
+
+      - name: Cloning monasca agent
+        git: repo=https://github.com/openstack/monasca-agent.git dest=/home/ubuntu/monitoring-agent/monasca-agent recursive=yes clone=yes
+#        when: ansible_os_family == 'RedHat'
+        become: false
+        tags: git
+
+      - name: Changing requirements
+        lineinfile: dest=/home/ubuntu/monitoring-agent/monasca-agent/requirements.txt state=present  regexp='^(.*)python-monascaclient>=1.0.30(.*)$' line='python-monascaclient'
+        tags: regs
+
+      - name: Install Python-2.7.11
+        shell: ./configure --prefix /usr/local/lib/python2.7.11 --enable-ipv6 && make &&  make install chdir=/home/ubuntu/monitoring-agent/Python-2.7.11
+#        when: ansible_os_family == 'RedHat'
+        become: true
+
+
+      - name: Activate virtualenv
+        shell: source venv/bin/activate  chdir=/home/ubuntu/monitoring-agent/Python-2.7.11
+        become: false
+        when: ansible_os_family == 'RedHat'
+
+        when: ansible_os_family == 'RedHat'
+
+      - name: pip install requirements
+        pip:  virtualenv=/home/ubuntu/monitoring-agent/Python-2.7.11/venv/ requirements=/home/ubuntu/monitoring-agent/requirement.txt
+        tags: req
+        become: true
+      #  when: ansible_os_family == 'RedHat'
+        tags: launch
+
+
+      - name: Install monasca agent
+        shell: /home/ubuntu/monitoring-agent/Python-2.7.11/venv/bin/python setup.py install chdir=/home/ubuntu/monitoring-agent/monasca-agent/
+        become: true
+        tags: installagent
+#        when: ansible_os_family == 'RedHat'
+      - name: Run monasca client
+        shell: /home/ubuntu/monitoring-agent/Python-2.7.11/venv/bin/monasca-setup --username mini-mon --password password --project_name mini-mon --service NFV-SDN-testbed --keystone_url http://157.159.232.218:35357/v3 --monasca_url http://157.159.232.217:8070/v2.0 --overwrite
+        become: true
+        tags: launch
+      # /usr/local/bin/monasca-setup
+      #

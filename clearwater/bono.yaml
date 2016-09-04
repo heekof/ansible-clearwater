@@ -1,0 +1,45 @@
+---
+  - hosts: bono
+    become: true
+    tasks:
+      - name: Update cache
+        apt: update_cache=yes
+      - name:
+        shell: bash -c 'echo "deb http://repo.cw-ngv.com/stable binary/" > /etc/apt/sources.list.d/clearwater.list '
+      - name: key
+        shell: curl -L http://repo.cw-ngv.com/repo_key | sudo apt-key add -
+
+      - name: Update cache
+        apt: update_cache=yes
+
+      - name: A
+        shell: mkdir -p /etc/clearwater; bash -c ' echo -e "local_ip=192.166.1.178 \n public_ip=157.159.232.174 \n public_hostname=ellis.jaafar.com \n etcd_cluster=\"192.166.1.178,192.166.1.183,192.166.1.177,192.166.1.182,192.166.1.179,192.166.1.181\"" > /etc/clearwater/local_config'
+
+      - name: B
+        shell : bash -c 'echo -e "# Deployment definitions \n home_domain=jaafar.com \n sprout_hostname=sprout.jaafar.com \n chronos_hostname=192.166.1.183:7253 \n hs_hostname=homestead.jaafar.com:8888 \n hs_provisioning_hostname=homestead.jaafar.com:8889 \n ralf_hostname=ralf.jaafar.com:10888 \n xdms_hostname=homer.jaafar.com:7888 \n \n   smtp_username=username \n smtp_password=password \n email_recovery_sender=TATA@TOTO.org \n signup_key=secret \n turn_workaround=secret \n ellis_api_key=secret \n ellis_cookie_key=secret " > /etc/clearwater/shared_config '
+
+
+      - name: install bono packets
+        apt: name=bono force=yes state=present
+
+      - name: install restund packets
+        apt: name=restund force=yes state=present
+
+      - name: install clearwater-config-manager
+        apt: name=clearwater-management force=yes state=present
+
+      - name: wait for etcd
+        command: /usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
+
+    #  - name: upload_shared_config
+    #    command: /usr/share/clearwater/clearwater-config-manager/scripts/upload_shared_config
+
+
+      - name: aaaaa
+        shell: ufw --force enable ; ufw allow 22/tcp ; ufw allow 2380/tcp ; ufw allow 161:162/udp ; ufw allow 4000/tcp ; ufw allow 3478 ; ufw allow 5060 ; ufw allow 5062/tcp ; ufw allow 5058/tcp ; ufw allow 32768:65535/udp ; ufw allow  6633/tcp
+
+      - name: toto
+        shell: bash -c 'echo "nameserver 192.166.1.180" > /etc/dnsmasq.resolv.conf' ; touch /etc/dnsmasq.resolv.conf ; bash -c 'echo "nameserver 192.166.1.180" > /etc/dnsmasq.resolv.conf' ; bash -c 'echo "RESOLV_CONF=/etc/dnsmasq.resolv.conf" >> /etc/default/dnsmasq'
+
+      # Example action to restart service dnsmasq, in all cases
+      - service: name=dnsmasq state=restarted
