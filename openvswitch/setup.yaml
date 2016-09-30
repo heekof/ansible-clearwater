@@ -23,7 +23,7 @@
           - configure
 
       - name: Parse the script
-        shell: bash -c 'echo -e  "#!/bin/bash\n\nsudo ovs-vsctl add-br br1\nsudo ovs-vsctl add-port br1 eth0\nsudo ip link set dev br1 address "$(cat /sys/class/net/eth0/address)"\nsudo ifconfig eth0 0\nsudo dhclient br1\n" > script.sh'
+        shell: bash -c 'echo -e  "#!/bin/bash\n\nsudo ovs-vsctl add-br br1\nsudo ovs-vsctl add-port br1 eth0\nsudo ip link set dev br1 address "$(cat /sys/class/net/eth0/address)"\nsudo ifconfig eth0 0\nsudo dhclient br1\nsudo ovs-vsctl set-controller br1 tcp:10.11.12.17:6633\novs-ofctl add-flow br1 table=0,priority=0,actions=NORMAL" > script.sh'
         tags:
           - configure
 
